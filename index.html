@@ -1,90 +1,689 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="te">
 <head>
-<meta charset="UTF-8">
-<title>Grama Collection Manager</title>
-
-<style>
-body{
-font-family:Arial,sans-serif;
-background:#f0f5f0;
-margin:0;
-padding:0;
-}
-
-.header{
-background:#198754;
-color:white;
-padding:20px;
-text-align:center;
-}
-
-.container{
-max-width:400px;
-margin:30px auto;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
-}
-
-input{
-width:100%;
-padding:12px;
-margin-top:10px;
-margin-bottom:15px;
-border:1px solid #ccc;
-border-radius:5px;
-box-sizing:border-box;
-}
-
-button{
-width:100%;
-padding:12px;
-background:#198754;
-color:white;
-border:none;
-border-radius:5px;
-font-size:16px;
-cursor:pointer;
-}
-
-button:hover{
-opacity:0.9;
-}
-
-.note{
-text-align:center;
-margin-top:15px;
-font-size:14px;
-color:gray;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grama Collection Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f5f0;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background: #198754;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 450px;
+            margin: 30px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            background: #eee;
+            color: #555;
+        }
+        .tab.active {
+            background: #198754;
+            color: white;
+            border-radius: 5px 5px 0 0;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #198754;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .note {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: gray;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .dashboard-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .menu-card {
+            background: #eef7f2;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            border: 1px solid #198754;
+            cursor: pointer;
+            font-weight: bold;
+            color: #198754;
+        }
+        .menu-card:hover {
+            background: #198754;
+            color: white;
+        }
+        .logout-btn {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+        .back-btn {
+            background: #6c757d;
+            margin-bottom: 15px;
+        }
+        .data-list {
+            margin-top: 20px;
+        }
+        .data-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-left: 5px solid #198754;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .data-info {
+            flex: 1;
+        }
+        .data-item h4 {
+            margin: 0;
+            color: #333;
+        }
+        .data-item p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+        .del-btn {
+            background: #dc3545;
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+        }
+        .wa-btn {
+            background: #25D366;
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+        }
+        .link-btn {
+            background: none;
+            color: #198754;
+            border: none;
+            padding: 0;
+            font-size: 14px;
+            cursor: pointer;
+            text-decoration: underline;
+            width: auto;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+        .link-btn:hover {
+            color: #13653f;
+            background: none;
+            opacity: 1;
+        }
+        .paid-badge {
+            color: #198754;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 13px;
+        }
+        th {
+            background-color: #198754;
+            color: white;
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="header">
-<h1>Grama Collection Manager</h1>
-<p>Customer Loan Tracking System</p>
+    <h1>Grama Collection Manager</h1>
+    <p>గ్రామీణ లోన్ కలెక్షన్ అండ్ మేనేజ్‌మెంట్ సిస్టమ్</p>
 </div>
 
-<div class="container">
+<div id="loginScreen" class="container">
+    <div class="tabs">
+        <div id="adminTab" class="tab active" onclick="switchTab('admin')">Admin Login</div>
+        <div id="customerTab" class="tab" onclick="switchTab('customer')">Customer Login</div>
+    </div>
 
-<h2>Customer Login</h2>
+    <h2 id="loginTitle">Admin Login</h2>
+    
+    <div id="phoneInputContainer" class="hidden">
+        <label>మొబైల్ నెంబర్:</label>
+        <input type="number" id="phone" placeholder="10 అంకెల మొబైల్ నెంబర్">
+        <button id="otpGenBtn" onclick="generateOTP()">OTP జనరేట్ చెయ్</button>
+        
+        <div id="otpSentBox" class="hidden" style="margin-top: 15px; background: #eef7f2; padding: 10px; border-radius: 5px; border: 1px dashed #198754;">
+            <p style="margin: 0 0 10px 0; font-weight: bold; color: #198754;">OTP క్రియేట్ అయింది!</p>
+            <button class="wa-btn" id="waOtpBtn" style="margin-bottom: 10px;">💬 WhatsApp కి OTP పంపు</button>
+            <label>ఎంటర్ OTP:</label>
+            <input type="number" id="custEnteredOtp" placeholder="4 అంకెల OTP కొట్టండి">
+        </div>
+    </div>
+    
+    <div id="userInputContainer">
+        <label>యూజర్ నేమ్:</label>
+        <input type="text" id="username" placeholder="Admin Username" value="admin">
+        <label id="passLabel">పాస్‌వర్డ్:</label>
+        <input type="password" id="password" placeholder="Password">
+        <button class="link-btn" id="forgotBtn" onclick="showScreen('forgotPasswordScreen')">Forgot Password?</button>
+    </div>
 
-<input type="text" placeholder="Mobile Number">
+    <button id="mainLoginBtn" onclick="handleLogin()" style="margin-top: 15px;">లాగిన్ అవ్వండి</button>
 
-<input type="password" placeholder="Password">
-
-<button>Login</button>
-
-<div class="note">
-Customer can view only their own details
+    <div id="loginNote" class="note">
+        అడ్మిన్ మాత్రమే గ్రూప్స్ మరియు కలెక్షన్స్ క్రియేట్ చేయగలరు.
+    </div>
 </div>
 
+<div id="forgotPasswordScreen" class="container hidden">
+    <button class="back-btn" onclick="showScreen('loginScreen')">⬅️ లాగిన్ స్క్రీన్‌కి వెళ్ళు</button>
+    <h2>🔐 అడ్మిన్ పాస్‌వర్డ్ రికవరీ</h2>
+    <p style="font-size: 14px; color: #555;">సెక్యూరిటీ ప్రశ్నకి కరెక్ట్ సమాధానం ఇచ్చి పాస్‌వర్డ్ మార్చుకోండి.</p>
+    
+    <label style="font-weight: bold; color: #198754;">ప్రслі: మీ మొదటి స్కూల్ పేరు ఏంటి? (Secret Answer)</label>
+    <input type="text" id="securityAnswerInput" placeholder="సమాధానం ఎంటర్ చేయండి">
+    <button onclick="verifySecurityAnswer()">Verify Answer</button>
+
+    <div id="resetPasswordBox" class="hidden" style="margin-top: 20px; border-top: 2px solid #ddd; padding-top: 15px;">
+        <label>కొత్త పాస్‌వర్డ్:</label>
+        <input type="password" id="newAdminPassword" placeholder="Enter New Password">
+        <button onclick="setNewAdminPassword()">💾 కొత్త పాస్‌వర్డ్ సేవ్ చెయ్</button>
+    </div>
 </div>
 
+<div id="dashboardScreen" class="container hidden">
+    <h2 id="welcomeText">స్వాగతం, అడ్మిన్!</h2>
+    <p>యాప్ ఫీచర్స్ ఇక్కడ మేనేజ్ చేసుకోండి:</p>
+
+    <div class="dashboard-menu">
+        <div class="menu-card" onclick="showScreen('groupsScreen')">👥 Groups Management</div>
+        <div class="menu-card" onclick="openCustomersScreen()">👤 Customers Management</div>
+        <div class="menu-card" onclick="openCollectionsScreen()">💰 Collections Entry</div>
+        <div class="menu-card" onclick="openReportsScreen()">📊 Reports Screen</div>
+    </div>
+
+    <button class="logout-btn" onclick="handleLogout()">లాగ్ అవుట్</button>
+</div>
+
+<div id="customerDashboardScreen" class="container hidden">
+    <h2 id="custWelcomeText">స్వాగతం, కస్టమర్!</h2>
+    
+    <div style="background: #eef7f2; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #198754;">
+        <h3 style="margin: 0 0 10px 0; color: #198754;" id="custBoxName">పేరు: -</h3>
+        <p style="margin: 5px 0;" id="custBoxGroup">గ్రూప్: -</p>
+        <p style="margin: 5px 0; font-weight: bold;" id="custBoxLoan">మొత్తం లోన్: ₹0</p>
+        <p style="margin: 5px 0; font-weight: bold; color: green;" id="custBoxPaid">ఇప్పటివరకు కట్టింది: ₹0</p>
+        <p style="margin: 5px 0; font-weight: bold; color: red;" id="custBoxBalance">బాకీ ఉన్న మొత్తం: ₹0</p>
+    </div>
+
+    <h3>మీ పేమెంట్ హిస్టరీ:</h3>
+    <div id="custHistoryList" class="data-list"></div>
+
+    <button class="logout-btn" onclick="handleLogout()">లాగ్ అవుట్</button>
+</div>
+
+<div id="groupsScreen" class="container hidden">
+    <button class="back-btn" onclick="showScreen('dashboardScreen')">⬅️ డ్యాష్‌బోర్డ్‌కి వెళ్ళు</button>
+    <h2>👥 కొత్త లోన్ గ్రూప్ క్రియేట్ చేయండి</h2>
+    <label>గ్రూప్ పేరు:</label>
+    <input type="text" id="groupName" placeholder="ఉదా: శ్రీ లక్ష్మి గ్రూప్">
+    <label>రూట్ / గ్రామం పేరు:</label>
+    <input type="text" id="groupRoute" placeholder="ఉదా: సుళ్ళురుపేట">
+    <button onclick="createGroup()">➕ గ్రూప్ క్రియేట్ చెయ్</button>
+
+    <h3>ప్రస్తుత గ్రూపుల జాబితా:</h3>
+    <div id="groupListContainer" class="data-list"></div>
+</div>
+
+<div id="customersScreen" class="container hidden">
+    <button class="back-btn" onclick="showScreen('dashboardScreen')">⬅️ డ్యాష్‌బోర్డ్‌కి వెళ్ళు</button>
+    <h2>👤 కొత్త కస్టమర్‌ను యాడ్ చేయండి</h2>
+    <label>సెలెక్ట్ గ్రూప్:</label>
+    <select id="custGroupSelect"></select>
+    <label>కస్టమర్ పేరు:</label>
+    <input type="text" id="custName" placeholder="ఉదా: సాయికృష్ణ">
+    <label>మొబైల్ నెంబర్:</label>
+    <input type="number" id="custPhone" placeholder="10 అంకెల మొబైల్ నెంబర్">
+    <label>లోన్ మొత్తం:</label>
+    <input type="number" id="custLoanAmount" placeholder="Rs. 50000">
+    <button onclick="createCustomer()">➕ కస్టమర్‌ను యాడ్ చెయ్</button>
+
+    <h3>కస్టమర్స్ జాబితా:</h3>
+    <div id="customerListContainer" class="data-list"></div>
+</div>
+
+<div id="collectionsScreen" class="container hidden">
+    <button class="back-btn" onclick="showScreen('dashboardScreen')">⬅️ డ్యాష్‌బోర్డ్‌కి వెళ్ళు</button>
+    <h2>💰 EMI కలెక్షన్ ఎంట్రీ</h2>
+    <label>సెలెక్ట్ కస్టమర్:</label>
+    <select id="collCustSelect" onchange="updateCustomerLoanInfo()"></select>
+    <div id="loanInfoBox" style="background: #eef7f2; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-weight: bold; color: #198754;">
+        మొత్తం లోన్: ₹0
+    </div>
+    <label>కట్టిన EMI మొత్తం:</label>
+    <input type="number" id="collAmount" placeholder="Rs. 2000">
+    <button onclick="createCollection()">💾 కలెక్షన్ సేవ్ చెయ్</button>
+
+    <h3>ఈరోజు వసూలైన కలెక్షన్స్ జాబితా:</h3>
+    <div id="collectionListContainer" class="data-list"></div>
+</div>
+
+<div id="reportsScreen" class="container hidden">
+    <button class="back-btn" onclick="showScreen('dashboardScreen')">⬅️ డ్యాష్‌బోర్డ్‌కి వెళ్ళు</button>
+    <h2>📊 లోన్ కలెక్షన్ రిపోర్ట్స్</h2>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; background: #eef7f2; padding: 10px; border-radius: 5px; font-weight: bold; color: #198754;">
+        <span id="totalLoansReport">మొత్తం లోన్లు: ₹0</span>
+        <span id="totalCollectedReport">మొత్తం వసూలు: ₹0</span>
+    </div>
+    <table id="reportsTable">
+        <thead>
+            <tr>
+                <th>కస్టమర్</th>
+                <th>లోన్</th>
+                <th>కట్టింది</th>
+                <th>రిమైండర్</th>
+            </tr>
+        </thead>
+        <tbody id="reportsTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+    let currentRole = 'admin';
+    let currentGeneratedOtp = null;
+    let currentCustomerPhone = null;
+
+    // గమనిక: బ్రౌజర్ లోకల్ స్టోరేజ్ లో క్రెడెన్షియల్స్ దాచడం టెస్టింగ్ కి మాత్రమే. ప్రొడక్షన్ లో క్లౌడ్ డేటాబేస్ వాడాలి.
+    let adminPassword = localStorage.getItem('adminPassword') || '1234';
+    let securityAnswer = localStorage.getItem('securityAnswer') || 'nbkrist'; 
+
+    let groupsData = JSON.parse(localStorage.getItem('groupsData')) || [];
+    let customersData = JSON.parse(localStorage.getItem('customersData')) || [];
+    let collectionsData = JSON.parse(localStorage.getItem('collectionsData')) || [];
+
+    window.onload = function() {
+        renderGroups();
+        renderCustomers();
+        renderCollections();
+    };
+
+    function switchTab(role) {
+        currentRole = role;
+        document.getElementById('adminTab').classList.toggle('active', role === 'admin');
+        document.getElementById('customerTab').classList.toggle('active', role === 'customer');
+        
+        if (role === 'admin') {
+            document.getElementById('loginTitle').innerText = 'Admin Login';
+            document.getElementById('userInputContainer').classList.remove('hidden');
+            document.getElementById('phoneInputContainer').classList.add('hidden');
+            document.getElementById('mainLoginBtn').classList.remove('hidden');
+        } else {
+            document.getElementById('loginTitle').innerText = 'Customer Login';
+            document.getElementById('userInputContainer').classList.add('hidden');
+            document.getElementById('phoneInputContainer').classList.remove('hidden');
+            document.getElementById('mainLoginBtn').classList.add('hidden'); 
+            resetOtpFields();
+        }
+    }
+
+    function resetOtpFields() {
+        currentGeneratedOtp = null;
+        document.getElementById('otpSentBox').classList.add('hidden');
+        document.getElementById('custEnteredOtp').value = '';
+        document.getElementById('otpGenBtn').classList.remove('hidden');
+    }
+
+    // --- OTP GENERATION FOR CUSTOMER ---
+    function generateOTP() {
+        const phone = document.getElementById('phone').value;
+        if(phone.length !== 10){
+            alert("10 అంకెల మొబైల్ నెంబర్ ఇవ్వండి");
+            return;
+        }
+        
+        const cust = customersData.find(c => c.phone === phone);
+        if(!cust) {
+            alert('ఈ మొబైల్ నెంబర్‌తో ఏ కస్టమర్ రిజిస్టర్ అవ్వలేదు! అడ్మిన్‌ను సంప్రదించండి.');
+            return;
+        }
+
+        currentCustomerPhone = phone;
+        currentGeneratedOtp = Math.floor(1000 + Math.random() * 9000);
+        
+        document.getElementById('otpGenBtn').classList.add('hidden');
+        document.getElementById('otpSentBox').classList.remove('hidden');
+        
+        // WhatsApp మ్యాన్యువల్ మెసేజ్ లింక్ క్రియేషన్
+        let otpMessage = `నమస్కారం ${cust.name} గారు, మీ గ్రామీణ లోన్ డ్యాష్‌బోర్డ్ లాగిన్ OTP: ${currentGeneratedOtp}`;
+        document.getElementById('waOtpBtn').onclick = function() {
+            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(otpMessage)}`, '_blank');
+        };
+        
+        alert(`టెస్టింగ్ కోసం OTP ఇక్కడే చూపిస్తున్నా మావా: ${currentGeneratedOtp}\n\n'WhatsApp కి OTP పంపు' బటన్ నొక్కు.`);
+    }
+
+    function handleLogin() {
+        if (currentRole === 'admin') {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            if (user === 'admin' && pass === adminPassword) {
+                showScreen('dashboardScreen');
+            } else {
+                alert('తప్పు యూజర్ నేమ్ లేదా పాస్‌వర్డ్!');
+            }
+        }
+    }
+
+    // ఆటో OTP వెరిఫికేషన్
+    document.getElementById('custEnteredOtp').oninput = function() {
+        if(this.value.length === 4) {
+            if(parseInt(this.value) === currentGeneratedOtp) {
+                alert('OTP విజయవంతంగా వెరిఫై అయింది!');
+                openCustomerDashboard(currentCustomerPhone);
+            } else {
+                alert('తప్పు OTP ఎంటర్ చేసారు! మళ్లీ ట్రై చేయండి.');
+                this.value = '';
+            }
+        }
+    };
+
+    // --- ADMIN PASSWORD RECOVERY ---
+    function verifySecurityAnswer() {
+        const ans = document.getElementById('securityAnswerInput').value.trim().toLowerCase();
+        if(ans === securityAnswer.toLowerCase()) {
+            alert('సెక్యూరిటీ ఆన్సర్ కరెక్ట్ మావా! ఇప్పుడు కింద కొత్త పాస్‌వర్డ్ సెట్ చేసుకో.');
+            document.getElementById('resetPasswordBox').classList.remove('hidden');
+        } else {
+            alert('తప్పు సమాధానం! పాస్‌వర్డ్ రికవరీ అవ్వదు.');
+        }
+    }
+
+    function setNewAdminPassword() {
+        const newPass = document.getElementById('newAdminPassword').value;
+        if(!newPass) { alert('పాస్‌వర్డ్ ఖాళీగా ఉండకూడదు!'); return; }
+        
+        adminPassword = newPass;
+        localStorage.setItem('adminPassword', adminPassword);
+        alert('అడ్మిన్ పాస్‌వర్డ్ విజయవంతంగా మార్చబడింది! కొత్త పాస్‌వర్డ్‌తో లాగిన్ అవ్వండి.');
+        document.getElementById('securityAnswerInput').value = '';
+        document.getElementById('newAdminPassword').value = '';
+        document.getElementById('resetPasswordBox').classList.add('hidden');
+        showScreen('loginScreen');
+    }
+
+    function showScreen(screenId) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.add('hidden');
+        document.getElementById('customerDashboardScreen').classList.add('hidden');
+        document.getElementById('groupsScreen').classList.add('hidden');
+        document.getElementById('customersScreen').classList.add('hidden');
+        document.getElementById('collectionsScreen').classList.add('hidden');
+        document.getElementById('reportsScreen').classList.add('hidden');
+        document.getElementById('forgotPasswordScreen').classList.add('hidden');
+        
+        document.getElementById(screenId).classList.remove('hidden');
+        
+        if(screenId === 'groupsScreen') renderGroups();
+        if(screenId === 'customersScreen') renderCustomers();
+        if(screenId === 'collectionsScreen') renderCollections();
+    }
+
+    // --- GROUPS ---
+    function createGroup() {
+        const name = document.getElementById('groupName').value;
+        const route = document.getElementById('groupRoute').value;
+        if (!name || !route) { alert('వివరాలు ఎంటర్ చేయండి!'); return; }
+        groupsData.push({ name: name, route: route });
+        localStorage.setItem('groupsData', JSON.stringify(groupsData));
+        document.getElementById('groupName').value = '';
+        document.getElementById('groupRoute').value = '';
+        renderGroups();
+    }
+
+    function renderGroups() {
+        const container = document.getElementById('groupListContainer');
+        if(!container) return;
+        container.innerHTML = groupsData.length === 0 ? '<p style="text-align:center; color:gray;">ఇంకా ఏ గ్రూపులు లేవు.</p>' : '';
+        groupsData.forEach((group, index) => {
+            container.innerHTML += `<div class="data-item">
+                <div class="data-info"><h4>${group.name}</h4><p>📍 రూట్: ${group.route}</p></div>
+                <button class="del-btn" onclick="deleteGroup(${index})">Delete</button>
+            </div>`;
+        });
+    }
+
+    function deleteGroup(index) {
+        if(confirm('ఈ గ్రూప్‌ను డిలీట్ చేయాలా? (ఇందులో ఉన్న కస్టమర్స్ కూడా డిలీట్ అవుతారు)')) {
+            const targetGroupName = groupsData[index].name;
+            const customersInGroup = customersData.filter(c => c.group === targetGroupName);
+            customersInGroup.forEach(cust => {
+                collectionsData = collectionsData.filter(col => col.phone !== cust.phone);
+            });
+            customersData = customersData.filter(c => c.group !== targetGroupName);
+            groupsData.splice(index, 1);
+            
+            localStorage.setItem('groupsData', JSON.stringify(groupsData));
+            localStorage.setItem('customersData', JSON.stringify(customersData));
+            localStorage.setItem('collectionsData', JSON.stringify(collectionsData));
+            renderGroups();
+        }
+    }
+
+    // --- CUSTOMERS ---
+    function openCustomersScreen() {
+        const select = document.getElementById('custGroupSelect');
+        select.innerHTML = '';
+        if (groupsData.length === 0) { alert('ముందు ఒక గ్రూప్ క్రియేట్ చేయండి!'); showScreen('groupsScreen'); return; }
+        groupsData.forEach(g => select.innerHTML += `<option value="${g.name}">${g.name}</option>`);
+        showScreen('customersScreen');
+    }
+
+    function createCustomer() {
+        const group = document.getElementById('custGroupSelect').value;
+        const name = document.getElementById('custName').value;
+        const phone = document.getElementById('custPhone').value;
+        const loan = document.getElementById('custLoanAmount').value;
+        if (!name || !phone || !loan) { alert('అన్ని వివరాలు ఎంటర్ చేయండి!'); return; }
+        
+        if(phone.length !== 10){
+            alert("10 అంకెల మొబైల్ నెంబర్ ఇవ్వండి");
+            return;
+        }
+        if(customersData.some(c => c.phone === phone)){
+            alert("ఈ మొబైల్ నెంబర్ ఇప్పటికే ఉంది!");
+            return;
+        }
+        
+        customersData.push({ group: group, name: name, phone: phone, loan: parseFloat(loan), collected: 0 });
+        localStorage.setItem('customersData', JSON.stringify(customersData));
+        document.getElementById('custName').value = '';
+        document.getElementById('custPhone').value = '';
+        document.getElementById('custLoanAmount').value = '';
+        renderCustomers();
+    }
+
+    function renderCustomers() {
+        const container = document.getElementById('customerListContainer');
+        if(!container) return;
+        container.innerHTML = customersData.length === 0 ? '<p style="text-align:center; color:gray;">ఇంకా ఏ కస్టమర్లు లేవు.</p>' : '';
+        customersData.forEach((cust, index) => {
+            container.innerHTML += `<div class="data-item">
+                <div class="data-info"><h4>${cust.name} (${cust.group})</h4><p>📱 ఫోన్: ${cust.phone} | 💰 లోన్: ₹${cust.loan}</p></div>
+                <button class="del-btn" onclick="deleteCustomer(${index})">Delete</button>
+            </div>`;
+        });
+    }
+
+    function deleteCustomer(index) {
+        if(confirm('ఈ కస్టమర్‌ను డిలీట్ చేయాలా? (వీరి పాత కలెక్షన్స్ కూడా డిలీట్ అవుతాయి)')) {
+            collectionsData = collectionsData.filter(c => c.phone !== customersData[index].phone);
+            customersData.splice(index, 1);
+            localStorage.setItem('customersData', JSON.stringify(customersData));
+            localStorage.setItem('collectionsData', JSON.stringify(collectionsData));
+            renderCustomers();
+        }
+    }
+
+    // --- COLLECTIONS ---
+    function openCollectionsScreen() {
+        const select = document.getElementById('collCustSelect');
+        select.innerHTML = '';
+        if (customersData.length === 0) { alert('ముందు ఒక కస్టమర్‌ను యాడ్ చేయండి!'); showScreen('customersScreen'); return; }
+        customersData.forEach((c, i) => select.innerHTML += `<option value="${i}">${c.name} (${c.group})</option>`);
+        showScreen('collectionsScreen');
+        updateCustomerLoanInfo();
+    }
+
+    function updateCustomerLoanInfo() {
+        const index = document.getElementById('collCustSelect').value;
+        if(index !== '') {
+            let balance = customersData[index].loan - customersData[index].collected;
+            document.getElementById('loanInfoBox').innerText = `మొత్తం లోన్: ₹${customersData[index].loan} | బాకీ: ₹${balance}`;
+        }
+    }
+
+    function createCollection() {
+        const index = document.getElementById('collCustSelect').value;
+        const amount = document.getElementById('collAmount').value;
+        if (!amount) { alert('అమౌంట్ ఎంటర్ చేయండి!'); return; }
+        
+        const cust = customersData[index];
+        if(cust.collected + parseFloat(amount) > cust.loan){
+            alert("लोन మొత్తాన్ని మించిపోయింది!");
+            return;
+        }
+        
+        cust.collected += parseFloat(amount);
+        
+        collectionsData.push({ name: cust.name, phone: cust.phone, group: cust.group, amount: amount, date: new Date().toLocaleDateString() });
+        localStorage.setItem('customersData', JSON.stringify(customersData));
+        localStorage.setItem('collectionsData', JSON.stringify(collectionsData));
+        
+        document.getElementById('collAmount').value = '';
+        alert('కలెక్షన్ సేవ్ చేయబడింది!');
+        updateCustomerLoanInfo();
+        renderCollections();
+    }
+
+    function renderCollections() {
+        const container = document.getElementById('collectionListContainer');
+        if(!container) return;
+        container.innerHTML = collectionsData.length === 0 ? '<p style="text-align:center; color:gray;">కలెక్షన్స్ లేవు.</p>' : '';
+        collectionsData.forEach(coll => {
+            container.innerHTML += `<div class="data-item"><h4>${coll.name}</h4><p>₹${coll.amount} | 📅 ${coll.date}</p></div>`;
+        });
+    }
+
+    // --- REPORTS ---
+    function openReportsScreen() {
+        showScreen('reportsScreen');
+        let totalLoans = 0, totalCollected = 0;
+        const tbody = document.getElementById('reportsTableBody');
+        tbody.innerHTML = '';
+        
+        customersData.forEach(cust => {
+            totalLoans += cust.loan;
+            totalCollected += cust.collected;
+            let balance = cust.loan - cust.collected;
+            
+            let actionContent = '';
+            if(balance > 0){
+                let message = `నమస్కారం ${cust.name} గారు, మన గ్రామీణ లోన్ కలెక్షన్ సిస్టమ్ ప్రకారం మీ మొత్తం లోన్ బాకీ లో ఇంకా ₹${balance} చెల్లించాల్సి ఉంది. దయచేసి గమనించగలరు.`;
+                let waLink = `https://wa.me/91${cust.phone}?text=${encodeURIComponent(message)}`;
+                actionContent = `<a href="${waLink}" target="_blank"><button class="wa-btn">💬 Send</button></a>`;
+            } else {
+                actionContent = `<span class="paid-badge">✅ Paid Complete</span>`;
+            }
+
+            tbody.innerHTML += `<tr>
+                <td><b>${cust.name}</b></td>
+                <td>₹${cust.loan}</td>
+                <td>₹${cust.collected}</td>
+                <td>${actionContent}</td>
+            </tr>`;
+        });
+        document.getElementById('totalLoansReport').innerText = `మొత్తం లోన్లు: ₹${totalLoans}`;
+        document.getElementById('totalCollectedReport').innerText = `మొత్తం వసూలు: ₹${totalCollected}`;
+    }
+
+    // --- CUSTOMER DASHBOARD ---
+    function openCustomerDashboard(phone) {
+        const cust = customersData.find(c => c.phone === phone);
+        if(!cust) return;
+        
+        showScreen('customerDashboardScreen');
+        document.getElementById('custBoxName').innerText = `పేరు: ${cust.name}`;
+        document.getElementById('custBoxGroup').innerText = `గ్రూప్: ${cust.group}`;
+        document.getElementById('custBoxLoan').innerText = `మొత్తం లోన్: ₹${cust.loan}`;
+        document.getElementById('custBoxPaid').innerText = `ఇప్పటివరకు కట్టింది: ₹${cust.collected}`;
+        document.getElementById('custBoxBalance').innerText = `బాకీ ఉన్న మొత్తం: ₹${cust.loan - cust.collected}`;
+        
+        const histContainer = document.getElementById('custHistoryList');
+        histContainer.innerHTML = '';
+        const myHistory = collectionsData.filter(col => col.phone === phone);
+        if(myHistory.length === 0) { histContainer.innerHTML = '<p style="text-align:center; color:gray;">ఎలాంటి పేమెంట్స్ లేవు.</p>'; return; }
+        
+        myHistory.forEach(h => {
+            histContainer.innerHTML += `<div class="data-item"><h4>₹${h.amount} కట్టారు</h4><p>📅 తేదీ: ${h.date}</p></div>`;
+        });
+    }
+
+    function handleLogout() { 
+        showScreen('loginScreen'); 
+        if(currentRole === 'customer') resetOtpFields();
+    }
+</script>
 </body>
 </html>
