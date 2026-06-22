@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="te">
 <head>
     <meta charset="UTF-8">
@@ -14,11 +14,18 @@
         input, select { width: 100%; padding: 12px; margin-top: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: #198754; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; font-weight: bold; }
         button:hover { opacity: 0.9; }
-        .note { text-align: center; margin-top: 15px; font-size: 14px; color: gray; }
         .hidden { display: none !important; }
         .dashboard-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .menu-card { background: #eef7f2; padding: 20px; text-align: center; border-radius: 8px; border: 1px solid #198754; cursor: pointer; font-weight: bold; color: #198754; }
         .menu-card:hover { background: #198754; color: white; }
+        
+        /* New Week Box Styles */
+        .week-box { background: #ffffff; border: 2px solid #198754; border-radius: 8px; padding: 15px; margin-top: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .week-box h3 { margin-top: 0; color: #198754; border-bottom: 1px solid #198754; padding-bottom: 8px; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .counter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; text-align: center; }
+        .counter-card { background: #f4faf6; border: 1px solid #a3cfbb; padding: 8px; border-radius: 5px; font-size: 12px; font-weight: bold; }
+        .counter-card.alert { background: #fff5f5; border: 1px solid #f5c2c2; color: #b02a37; }
+        
         .logout-btn { background: #dc3545; margin-top: 20px; }
         .back-btn { background: #6c757d; margin-bottom: 15px; }
         .data-list { margin-top: 20px; }
@@ -26,12 +33,13 @@
         .data-info { flex: 1; }
         .data-item h4 { margin: 0; color: #333; }
         .data-item p { margin: 5px 0 0 0; font-size: 13px; color: #666; }
-        .wa-btn { background: #25D366; padding: 5px 10px; font-size: 12px; width: auto; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .wa-btn { background: #25D366; padding: 6px 10px; font-size: 12px; width: auto; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; }
         .del-btn { background: #dc3545; padding: 5px 10px; font-size: 12px; width: auto; color: white; border: none; border-radius: 4px; cursor: pointer; }
         .link-btn { background: none; color: #198754; border: none; padding: 0; font-size: 14px; cursor: pointer; text-decoration: underline; width: auto; margin-top: 5px; }
         .paid-badge { color: #198754; font-weight: bold; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 13px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
         th { background-color: #198754; color: white; }
         .backup-section { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #ccc; text-align: center; }
         .backup-btn { background: #0d6efd; margin-bottom: 10px; }
@@ -71,7 +79,10 @@
         <input type="text" id="username" placeholder="Admin Username">
         <label>పాస్‌వర్డ్:</label>
         <input type="password" id="password" placeholder="Password">
-        <button class="link-btn" onclick="showScreen('forgotPasswordScreen')">Forgot Password?</button>
+        <div style="display: flex; justify-content: space-between;">
+            <button class="link-btn" onclick="showScreen('forgotPasswordScreen')">Forgot Password?</button>
+            <button class="link-btn" onclick="forceResetCredentials()" style="color: #dc3545;">⚠️ Reset to Default</button>
+        </div>
     </div>
     <button id="mainLoginBtn" onclick="handleLogin()" style="margin-top: 15px;">లాగిన్ అవ్వండి</button>
 </div>
@@ -110,12 +121,46 @@
         <div class="menu-card" onclick="openReportsScreen()">📊 Reports Screen</div>
     </div>
 
+    <div class="week-box">
+        <h3>🗓️ ఈ వారం EMI వసూళ్ల డ్యాష్‌బోర్డ్</h3>
+        
+        <label style="font-weight: bold; font-size: 13px; color: #198754;">కలెక్షన్ వారాన్ని ఎంచుకోండి:</label>
+        <select id="dashboardWeekFilter" onchange="renderWeeklyDashboardData()" style="margin-bottom: 12px; padding: 8px;">
+            <option value="Monday">Monday (సోమవారం)</option>
+            <option value="Tuesday">Tuesday (మంగళవారం)</option>
+            <option value="Wednesday">Wednesday (బుధవారం)</option>
+            <option value="Thursday">Thursday (గురువారం)</option>
+            <option value="Friday">Friday (శుక్రవారం)</option>
+            <option value="Saturday">Saturday (శనివారం)</option>
+        </select>
+
+        <div class="counter-grid">
+            <div id="weekPendingCard" class="counter-card alert">⚠️ బాకీ ఉన్నవారు: 0 మంది</div>
+            <div id="weekTargetCard" class="counter-card" style="color: #198754;">💰 రావలసిన అమౌంట్: ₹0</div>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>కస్టమర్ (గ్రూప్)</th>
+                        <th>లోన్ / కట్టింది</th>
+                        <th>బాకీ</th>
+                        <th>అలర్ట్</th>
+                    </tr>
+                </thead>
+                <tbody id="weeklyDashboardBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="backup-section">
         <h3>💾 యాప్ డేటా బ్యాకప్ సిస్టమ్</h3>
         <button class="backup-btn" onclick="exportAppBackup()">📤 Export Backup (ఫైల్ డౌన్‌లోడ్)</button>
         <input type="file" id="importBackupFile" accept=".json" style="display:none;" onchange="importAppBackup(event)">
         <button class="restore-btn" onclick="document.getElementById('importBackupFile').click()">📥 Import Backup (ఫైల్ అప్‌లోడ్)</button>
-        <button class="link-btn" onclick="openChangePasswordScreen()" style="display:block; margin: 15px auto 0 auto; font-weight: bold;">🔑 Change Username/Password</button>
+        <button class="link-btn" onclick="showScreen('changePasswordScreen')" style="display:block; margin: 15px auto 0 auto; font-weight: bold;">🔑 Change Username/Password</button>
     </div>
 
     <button class="logout-btn" onclick="handleLogout()">లాగ్ అవుట్</button>
@@ -236,11 +281,31 @@
     window.onload = function() { 
         document.getElementById('username').value = adminUsername;
         renderGroups(); renderCustomers(); renderCollections(); checkPersistentOtpState(); 
+        
+        // Auto select current day on weekly dashboard
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const currentDay = days[new Date().getDay()];
+        if(currentDay !== 'Sunday' && document.getElementById('dashboardWeekFilter')) {
+            document.getElementById('dashboardWeekFilter').value = currentDay;
+        }
+        renderWeeklyDashboardData();
     };
 
     function escapeHtml(text) {
         if (!text) return '';
         return text.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function forceResetCredentials() {
+        if(confirm('లోకల్ క్రెడెన్షియల్స్ ని డిఫాల్ట్ (admin / Admin@123) కి రీసెట్ చేయాలా మావా?')) {
+            adminUsername = 'admin';
+            adminPassword = 'Admin@123';
+            localStorage.setItem('adminUsername', adminUsername);
+            localStorage.setItem('password', adminPassword);
+            document.getElementById('username').value = adminUsername;
+            document.getElementById('password').value = '';
+            alert('రీసెట్ అయింది మావా! ఇప్పుడు యూజర్ నేమ్: admin మరియు పాస్‌వర్డ్: Admin@123 కొట్టి లాగిన్ అవ్వు.');
+        }
     }
 
     function switchTab(role) {
@@ -374,7 +439,7 @@
         localStorage.setItem('adminUsername', adminUsername);
         localStorage.setItem('adminPassword', adminPassword);
         
-        alert('వివరాలు విజయవంతంగా అప్‌డేట్ చేయబడ్డాయి!');
+        alert('విವರాలు విజయవంతంగా అప్‌డేట్ చేయబడ్డాయి!');
         document.getElementById('username').value = adminUsername;
         document.getElementById('currentAdminPassInput').value = '';
         document.getElementById('updateAdminPassInput').value = '';
@@ -385,13 +450,13 @@
         ['loginScreen', 'dashboardScreen', 'customerDashboardScreen', 'groupsScreen', 'customersScreen', 'collectionsScreen', 'reportsScreen', 'forgotPasswordScreen', 'changePasswordScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
         document.getElementById(screenId).classList.remove('hidden');
         
+        if(screenId === 'dashboardScreen') renderWeeklyDashboardData();
         if(screenId === 'groupsScreen') renderGroups();
         if(screenId === 'customersScreen') renderCustomers();
         if(screenId === 'collectionsScreen') {
             const select = document.getElementById('collCustSelect');
             if(select) {
                 select.innerHTML = '';
-                // కరెక్షన్ 1: గ్రూప్ ఇంటర్పోలేషన్ లో మిస్సయిన బ్రాకెట్ సింటాక్స్ ఎర్రర్ పక్కాగా ఫిక్స్ అయింది
                 customersData.forEach((c, idx) => {
                     if(c.status !== 'Deleted') {
                         select.innerHTML += `<option value="${idx}">${escapeHtml(c.name)} (${escapeHtml(c.group)})</option>`;
@@ -403,8 +468,53 @@
         }
     }
 
+    // 🗓️ NEW DYNAMIC WEEK WISE LOGIC FOR DASHBOARD BOX
+    function renderWeeklyDashboardData() {
+        const selectedDay = document.getElementById('dashboardWeekFilter').value;
+        const tbody = document.getElementById('weeklyDashboardBody'); 
+        if(!tbody) return;
+        tbody.innerHTML = '';
+
+        let pendingCount = 0;
+        let totalTargetAmount = 0;
+
+        customersData.filter(c => c.status !== 'Deleted').forEach(cust => {
+            const grp = groupsData.find(g => g.name === cust.group && g.status !== 'Deleted');
+            const grpDay = grp ? grp.day : 'N/A';
+
+            if(grpDay === selectedDay) {
+                let balance = Math.max(0, cust.loan - cust.collected);
+                let actionBtn = '';
+
+                if(balance > 0) {
+                    pendingCount++;
+                    totalTargetAmount += balance;
+                    
+                    let msg = `నమస్కారం ${cust.name} గారు, ఈరోజు మన గ్రామీణ బ్యాంక్ లోన్ ఈఎమ్‌ఐ కలెక్షన్ డేట్ (${selectedDay}). మీ బాకీ మొత్తం ₹${balance}. దయచేసి అమౌంట్ రెడీగా ఉంచుకోగలరు.`;
+                    let waUrl = `https://wa.me/91${cust.phone}?text=${encodeURIComponent(msg)}`;
+                    actionBtn = `<a href="${waUrl}" target="_blank"><button class="wa-btn">💬 Send SMS Alert</button></a>`;
+                } else {
+                    actionBtn = '<span class="paid-badge">✅ Paid Complete</span>';
+                }
+
+                tbody.innerHTML += `<tr>
+                    <td><b>${escapeHtml(cust.name)}</b><br><small style="color:#666;">(${escapeHtml(cust.group)})</small></td>
+                    <td>₹${cust.loan}<br><small style="color:green;">₹${cust.collected}</small></td>
+                    <td style="color:${balance > 0 ? 'red' : 'green'}; font-weight:bold;">₹${balance}</td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+            }
+        });
+
+        if(tbody.innerHTML === '') {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:gray; padding: 15px;">ఈ వారం ఈ రోజున ఎలాంటి గ్రూపులు లేదా కస్టమర్లు లేరు మావా!</td></tr>`;
+        }
+
+        document.getElementById('weekPendingCard').innerText = `⚠️ బాకీ ఉన్నవారు: ${pendingCount} మంది`;
+        document.getElementById('weekTargetCard').innerText = `💰 రావలసిన అమౌంట్: ₹${totalTargetAmount}`;
+    }
+
     function createGroup() {
-        // కరెక్షన్ 2: గ్రూప్ రూట్ (Village Name) ని కూడా పక్కాగా .trim() చేసాను మావా
         const name = document.getElementById('groupName').value.trim(), route = document.getElementById('groupRoute').value.trim(), day = document.getElementById('groupDay').value;
         if (!name || !route) return;
         
@@ -417,6 +527,7 @@
         localStorage.setItem('groupsData', JSON.stringify(groupsData));
         document.getElementById('groupName').value = ''; document.getElementById('groupRoute').value = '';
         renderGroups();
+        renderWeeklyDashboardData();
     }
 
     function renderGroups() {
@@ -453,6 +564,7 @@
             renderGroups();
             renderCustomers();
             renderCollections();
+            renderWeeklyDashboardData();
         }
     }
 
@@ -478,6 +590,7 @@
         localStorage.setItem('customersData', JSON.stringify(customersData));
         document.getElementById('custName').value = ''; document.getElementById('custPhone').value = ''; document.getElementById('custLoanAmount').value = '';
         renderCustomers();
+        renderWeeklyDashboardData();
     }
 
     function renderCustomers() {
@@ -507,10 +620,9 @@
             
             renderCustomers();
             renderCollections();
+            renderWeeklyDashboardData();
         }
     }
-
-    function openCollectionsScreen() { showScreen('collectionsScreen'); }
 
     function updateCustomerLoanInfo() {
         const idx = document.getElementById('collCustSelect').value;
@@ -543,6 +655,7 @@
         document.getElementById('collAmount').value = ''; 
         updateCustomerLoanInfo(); 
         renderCollections();
+        renderWeeklyDashboardData();
 
         setTimeout(() => {
             let receiptMsg = `నమస్కారం ${cust.name} గారు, మీ లోన్ EMI మొత్తం నుండి ₹${roundedAmount} విజయవంతంగా వసూలైంది. తేదీ: ${formattedDate}. ధన్యవాదాలు!`;
@@ -583,6 +696,7 @@
             
             renderCollections();
             updateCustomerLoanInfo();
+            renderWeeklyDashboardData();
         }
     }
 
@@ -637,7 +751,6 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.setAttribute("href", url);
-        // కరెక్షన్ 3: ఫైల్ నేమ్ లో స్లాష్ వల్ల ఎర్రర్ రాకుండా సేఫ్‌గా `Date.now()` సెట్ చేసాను మావా
         link.setAttribute("download", `Grama_Bank_Reports_${Date.now()}.csv`);
         document.body.appendChild(link);
         link.click();
@@ -709,6 +822,7 @@
                     
                     document.getElementById('username').value = adminUsername;
                     renderGroups(); renderCustomers(); renderCollections();
+                    renderWeeklyDashboardData();
                     showScreen('dashboardScreen');
                     alert('యాప్ డేటా & క్రెడెన్షియల్స్ మొత్తం సక్సెస్‌ఫుల్ గా రీస్టోర్ అయ్యాయి మావా!');
                 } else { alert('ఇది సరైన బ్యాకప్ ఫైల్ కాదు మావా!'); }
@@ -724,4 +838,3 @@
 </script>
 </body>
 </html>
-          
