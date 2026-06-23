@@ -1,30 +1,42 @@
 import React, { useState } from 'react';
 
 export default function GramaDashboard() {
+  // ==========================================
+  // 1. BATTA SAIKRISHNA - IDENTITY & CONFIGS
+  // ==========================================
   const ADMIN_NAME = "BATTA SAIKRISHNA";
-  const ADMIN_MOBILE = "+91XXXXXXXXXX"; // ఇక్కడ నీ నంబర్ ఇవ్వు మావా
+  const ADMIN_MOBILE = "+919346271976"; // నీ రియల్ నంబర్ సెట్ అయింది మావా!
   const BANK_NAME = "AU FINANCIAL BANK";
   const APP_URL = "https://grama-collection-manager-8087ml13o-hardikhayan-8403s-projects.vercel.app";
 
+  // Form & System States
   const [name, setName] = useState('');
   const [village, setVillage] = useState('');
   const [imageSrc, setImageSrc] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [selectedDay, setSelectedDay] = useState('Tuesday (మంగళవారం)');
+  
+  // Custom Sample Customers Database List
+  const [customerList, setCustomerList] = useState([
+    { id: 1, name: 'Sample Customer', village: 'Ramapuram', loanAmount: 50000, paid: 12000, balance: 38000 }
+  ]);
 
+  // 1. WhatsApp Security OTP Approval Logic
   const triggerEmployeeVerification = (employeeName) => {
     const generatedOTP = Math.floor(1000 + Math.random() * 9000);
-    const textMessage = `🚨 Security Alert! Employee *${employeeName}* attempts to log in to Grama Manager. Code: *${generatedOTP}*`;
+    const textMessage = `🚨 Security Alert! Employee *${employeeName}* attempts to log in to Grama Manager. Provide this verification OTP code if authorized by Owner *${ADMIN_NAME}*: *${generatedOTP}*`;
     const whatsappGatewayUrl = `https://api.whatsapp.com/send?phone=${ADMIN_MOBILE}&text=${encodeURIComponent(textMessage)}`;
     window.open(whatsappGatewayUrl, '_blank');
   };
 
+  // 2. Receipt Dispatched Message Template
   const sendCustomerReceipt = (customerName, amountPaid, balanceDue) => {
     const textMessage = `Dear Customer, transacting with *${BANK_NAME}*. Payment of ₹${amountPaid} processed successfully by Admin ${ADMIN_NAME}. Remaining Balance: ₹${balanceDue}. Check status here: ${APP_URL}`;
     const whatsappGatewayUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(textMessage)}`;
     window.open(whatsappGatewayUrl, '_blank');
   };
 
+  // 3. Live Front/Rear Camera Capture
   const handleCameraCapture = async () => {
     try {
       setIsCapturing(true);
@@ -40,33 +52,70 @@ export default function GramaDashboard() {
           canvas.height = video.videoHeight;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0);
+          
           const capturedDataUrl = canvas.toDataURL('image/jpeg');
           setImageSrc(capturedDataUrl);
+          
           stream.getTracks().forEach(track => track.stop());
           setIsCapturing(false);
         }, 1000);
       };
     } catch (err) {
-      alert("Camera access failed mavaa!");
+      alert("Camera open avvaledhu mavaa!");
       setIsCapturing(false);
     }
+  };
+
+  // 4. Save Customer Profiler
+  const handleSave = () => {
+    if (!name || !village) {
+      alert("పేరు మరియు ఊరు ఎంటర్ చేయాలి మావా!");
+      return;
+    }
+
+    const newCustomer = {
+      id: Date.now(),
+      name,
+      village,
+      loanAmount: 0,
+      paid: 0,
+      balance: 0
+    };
+
+    setCustomerList([...customerList, newCustomer]);
+    alert(`🎉 కస్టమర్ ${name} సేవ్ అయ్యాడు మావా!`);
+    setName('');
+    setVillage('');
+    setImageSrc(null);
+  };
+
+  // 5. Export Data Function (ఇక్కడికి మార్చాను మావా!)
+  const exportData = () => {
+    const data = JSON.stringify(customerList, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div style={{ fontFamily: 'sans-serif', maxWidth: '500px', margin: '0 auto', padding: '15px', background: '#f9fafb', minHeight: '100vh', boxSizing: 'border-box' }}>
       
-      {/* 1. ADMIN TRUST CARD */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: '#ffffff', padding: '15px', borderRadius: '16px', border: '1px solid #10b981', marginBottom: '20px' }}>
-        <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '20px' }}>
+      {/* 1. WELCOME HEADER WITH YOUR NAME */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', background: '#ffffff', padding: '12px', borderRadius: '12px', border: '1px solid #10b981' }}>
+        <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#10b981', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px' }}>
           BS
         </div>
         <div>
-          <h3 style={{ margin: '0', fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>{ADMIN_NAME}</h3>
-          <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#4b5563' }}>📱 Contact: {ADMIN_MOBILE}</p>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', color: '#000000' }}>స్వాగతం, {ADMIN_NAME}!</h2>
+          <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#6b7280' }}>👑 System Admin & Owner</p>
         </div>
       </div>
 
-      {/* NAVIGATION CONTROLS */}
+      {/* 2. MAIN 4 NAVIGATION BUTTONS */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
         <button style={navButtonStyle}>👥 Groups<br/>Management</button>
         <button style={navButtonStyle}>👤 Customers<br/>Management</button>
@@ -74,12 +123,106 @@ export default function GramaDashboard() {
         <button style={navButtonStyle}>📊 Reports<br/>Screen</button>
       </div>
 
-      {/* 2. REGISTRATION BOX WITH PHOTO */}
+      {/* 3. NEW UPGRADE: CUSTOMER REGISTRATION CARDS */}
       <div style={{ border: '1px solid #10b981', borderRadius: '12px', padding: '16px', background: '#ffffff', marginBottom: '20px' }}>
-        <h4 style={{ margin: '0 0 12px 0', color: '#10b981', fontWeight: 'bold', fontSize: '16px' }}>
+        <h4 style={{ margin: '0 0 12px 0', color: '#10b981', fontWeight: 'bold', fontSize: '15px' }}>
           👤 కొత్త కస్టమర్ రిజిస్ట్రేషన్ (With Live Photo)
         </h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <input type="text" placeholder="కస్టమర్ పేరు (Customer Name)" value={name} onChange={(e) => setName(e.target.value)} style={inputStyle} />
           <input type="text" placeholder="ఊరు పేరు (Village Name)" value={village} onChange={(e) => setVillage(e.target.value)} style={inputStyle} />
-          <button onClick={
+          <button onClick={handleCameraCapture} disabled={isCapturing} style={{ ...actionButtonStyle, background: '#4b5563' }}>
+            📷 {isCapturing ? 'Capturing...' : 'క్యాప్చర్ ఫోటో (Take Photo)'}
+          </button>
+        </div>
+
+        {imageSrc && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f0fdf4', padding: '10px', borderRadius: '8px', marginTop: '12px', border: '1px dashed #10b981' }}>
+            <img src={imageSrc} alt="Preview" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #10b981' }} />
+            <span style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600' }}>✔️ ఫోటో రెడీగా ఉంది!</span>
+          </div>
+        )}
+
+        <button onClick={handleSave} style={{ ...actionButtonStyle, background: '#10b981', marginTop: '12px' }}>
+          💾 కస్టమర్ డేటాను సేవ్ చేయి
+        </button>
+      </div>
+
+      {/* 4. EMI DASHBOARD BOX */}
+      <div style={{ border: '1px solid #10b981', borderRadius: '12px', padding: '16px', background: '#ffffff', marginBottom: '20px' }}>
+        <h4 style={{ margin: '0 0 12px 0', color: '#10b981', fontWeight: 'bold', textAlign: 'center', fontSize: '15px' }}>
+          🗓️ ఈ వారం EMI వసూళ్ల డాష్‌బోర్డ్ ({BANK_NAME})
+        </h4>
+        
+        <p style={{ margin: '4px 0', fontSize: '13px', fontWeight: 'bold', color: '#10b981' }}>కలెక్షన్ వారాన్ని ఎంచుకోండి:</p>
+        <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', background: '#f9fafb', marginBottom: '12px', fontSize: '13px' }}>
+          <option>Tuesday (మంగళవారం)</option>
+          <option>Wednesday (बुधवार)</option>
+        </select>
+
+        {/* Info Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+          <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', padding: '8px', borderRadius: '8px', textAlign: 'center', color: '#991b1b', fontSize: '12px', fontWeight: 'bold' }}>
+            ⚠️ బాకీ ఉన్నవారు: 0 మంది
+          </div>
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '8px', borderRadius: '8px', textAlign: 'center', color: '#16a34a', fontSize: '12px', fontWeight: 'bold' }}>
+            💰 రావలసిన అమౌంట్: ₹0
+          </div>
+        </div>
+
+        {/* Full Interactive Table */}
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ background: '#10b981', color: '#ffffff' }}>
+                <th style={thStyle}>కస్టమర్ (ఊరు)</th>
+                <th style={thStyle}>లోన్ / కట్టింది</th>
+                <th style={thStyle}>బాకీ</th>
+                <th style={thStyle}>యాక్షన్</th>
+              </tr>
+            </thead>
+            <tbody>
+              {customerList.map((cust) => (
+                <tr key={cust.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                  <td style={tdStyle}><strong>{cust.name}</strong><br/><span style={{fontSize:'10px', color:'#6b7280'}}>{cust.village}</span></td>
+                  <td style={tdStyle}>₹{cust.loanAmount}<br/><span style={{color:'#16a34a'}}>₹{cust.paid}</span></td>
+                  <td style={{ ...tdStyle, color: '#dc2626', fontWeight: 'bold' }}>₹{cust.balance}</td>
+                  <td style={tdStyle}>
+                    <button onClick={() => sendCustomerReceipt(cust.name, 2000, cust.balance)} style={{ background: '#2563eb', color: '#ffffff', border: 'none', padding: '4px 6px', borderRadius: '4px', fontSize: '11px', cursor: 'pointer' }}>
+                      💬 Send SMS
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 5. BACKUP SYSTEM BUTTONS */}
+      <h3 style={{ fontSize: '16px', fontWeight: 'bold', margin: '20px 0 12px 0', textAlign: 'center' }}>
+        💾 యాప్ డేటా బ్యాకప్ సిస్టమ్
+      </h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+        <button onClick={exportData} style={{ ...actionButtonStyle, background: '#2563eb' }}>
+          📥 Export Backup (ఫైల్ డౌన్‌లోడ్)
+        </button>    
+      </div>
+
+      {/* STAF SECURITY CONTROL TRIGGER */}
+      <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', padding: '12px', borderRadius: '12px', textAlign: 'center' }}>
+        <button onClick={() => triggerEmployeeVerification("New Employee")} style={{ background: '#d97706', color: '#fff', border: 'none', padding: '8px', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold', cursor: 'pointer', width: '100%' }}>
+          🔐 Test Security Employee Login Alert
+        </button>
+      </div>
+
+    </div>
+  );
+}
+
+// Styling Blueprints
+const navButtonStyle = { background: '#f0fdf4', border: '1px solid #10b981', color: '#10b981', padding: '16px 8px', borderRadius: '12px', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', textAlign: 'center', lineHeight: '1.4' };
+const inputStyle = { width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: '13px' };
+const actionButtonStyle = { width: '100%', color: '#ffffff', border: 'none', padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px', textAlign: 'center' };
+const thStyle = { padding: '8px', textAlign: 'left', fontWeight: '600' };
+const tdStyle = { padding: '8px', verticalAlign: 'middle' };
