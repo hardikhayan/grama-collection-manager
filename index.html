@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // ==========================================
-// 1. GLOBAL APP LOGIC HOOK (Data Handlers)
+// 1. GLOBAL APP LOGIC HOOK
 // ==========================================
 export const useGramaCollectionSystem = () => {
   const [isAdminApproved, setIsAdminApproved] = useState(false);
@@ -9,43 +9,29 @@ export const useGramaCollectionSystem = () => {
   const [employeePin, setEmployeePin] = useState('');
   const [customers, setCustomers] = useState([]); 
   
-  // Custom Constants as requested
   const ADMIN_NAME = "BATTA SAIKRISHNA";
-  const ADMIN_MOBILE = "+91XXXXXXXXXX"; // ఇక్కడ నీ రియల్ మొబైల్ నంబర్ ఇవ్వు మావా
+  const ADMIN_MOBILE = "+91XXXXXXXXXX"; // నీ మొబైల్ నంబర్ ఇక్కడ ఇవ్వు
   const BANK_NAME = "AU FINANCIAL BANK";
   const APP_URL = "https://grama-collection-manager-8087ml13o-hardikhayan-8403s-projects.vercel.app";
   
-  // Employee Verification via WhatsApp
   const triggerEmployeeVerification = (employeeName) => {
     const generatedOTP = Math.floor(1000 + Math.random() * 9000); 
     setShowApprovalModal(true);
-    
-    const textMessage = `🚨 Security Alert! Employee *${employeeName}* attempts to log in to Grama Manager. Provide this verification OTP code if authorized: *${generatedOTP}*`;
+    const textMessage = `🚨 Security Alert! Employee *${employeeName}* attempts to log in. Code: *${generatedOTP}*`;
     const whatsappGatewayUrl = `https://api.whatsapp.com/send?phone=${ADMIN_MOBILE}&text=${encodeURIComponent(textMessage)}`;
-    
     window.open(whatsappGatewayUrl, '_blank');
     return generatedOTP; 
   };
 
-  // Transaction Message Parser Template 
   const generateCustomerReceiptMessage = (customerName, amountPaid, balanceDue) => {
-    return `Dear Customer, transacting with *${BANK_NAME}*. Payment of ₹${amountPaid} processed successfully by Admin ${ADMIN_NAME}. Remaining Balance: ₹${balanceDue}. Check status here: ${APP_URL} . For queries, support contact: ${ADMIN_MOBILE}`;
+    return `Dear Customer, transacting with *${BANK_NAME}*. Payment of ₹${amountPaid} processed by Admin ${ADMIN_NAME}. Balance: ₹${balanceDue}. App: ${APP_URL}`;
   };
 
-  return {
-    ADMIN_NAME,
-    ADMIN_MOBILE,
-    BANK_NAME,
-    APP_URL,
-    triggerEmployeeVerification,
-    generateCustomerReceiptMessage,
-    customers,
-    setCustomers
-  };
+  return { ADMIN_NAME, ADMIN_MOBILE, BANK_NAME, APP_URL, triggerEmployeeVerification, generateCustomerReceiptMessage, customers, setCustomers };
 };
 
 // ==========================================
-// 2. UI COMPONENT: CUSTOMER CAPTURE ROW (With Camera)
+// 2. UI COMPONENT: CUSTOMER CAPTURE ROW (మొబైల్ ఆప్టిమైజ్డ్ డిజైన్)
 // ==========================================
 export const CustomerCaptureRow = ({ onSaveCustomer }) => {
   const [name, setName] = useState('');
@@ -53,12 +39,10 @@ export const CustomerCaptureRow = ({ onSaveCustomer }) => {
   const [imageSrc, setImageSrc] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
 
-  // Mobile Camera Capture Trigger Handler
   const handleCameraCapture = async () => {
     try {
       setIsCapturing(true);
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-      
       const video = document.createElement('video');
       video.srcObject = stream;
       video.play();
@@ -70,125 +54,108 @@ export const CustomerCaptureRow = ({ onSaveCustomer }) => {
           canvas.height = video.videoHeight;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0);
-          
-          // Convert captured photo to Base64 String format
           const capturedDataUrl = canvas.toDataURL('image/jpeg');
           setImageSrc(capturedDataUrl);
-          
-          // Stop camera stream to save battery
           stream.getTracks().forEach(track => track.stop());
           setIsCapturing(false);
-        }, 1000); // 1-second delay for focus
+        }, 1000);
       };
     } catch (err) {
-      console.error("Camera access failed mavaa: ", err);
-      alert("Camera open avvaledhu mavaa! Settings lo camera permissions check chesko.");
+      alert("Camera open avvaledhu మావా!");
       setIsCapturing(false);
     }
   };
 
-  // Submit Handler to save name, village and captured image
   const handleSubmit = () => {
     if (!name || !village) {
-      alert("పేరు మరియు ఊరు ఖచ్చితంగా ఎంటర్ చేయాలి మావా!");
+      alert("పేరు మరియు ఊరు ఎంటర్ చేయాలి మావా!");
       return;
     }
-    
-    // Trigger the save function passed from main app dashboard
     if (onSaveCustomer) {
       onSaveCustomer({ name, village, image: imageSrc });
-      // Reset input fields after successful save
       setName('');
       setVillage('');
       setImageSrc(null);
-      alert("కస్టమర్ ప్రొఫైల్ ఫోటోతో సహా సక్సెస్‌ఫుల్‌గా యాడ్ అయింది మావా! 🎉");
+      alert("కస్టమర్ ప్రొఫైల్ సక్సెస్‌ఫుల్‌గా యాడ్ అయింది! 🎉");
     }
   };
 
   return (
     <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px',
-      padding: '16px',
+      fontFamily: 'sans-serif',
+      padding: '20px',
+      margin: '15px auto',
+      maxWidth: '480px',
       background: '#ffffff',
       borderRadius: '12px',
-      border: '1px solid #e5e7eb',
-      margin: '15px 0',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+      border: '1px solid #10b981', // నీ యాప్ మ్యాచింగ్ గ్రీన్ బోర్డర్
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
     }}>
-      <h4 style={{ margin: '0 0 4px 0', color: '#1f2937', fontWeight: 'bold' }}>
+      <h3 style={{ margin: '0 0 16px 0', color: '#111827', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
         👤 కొత్త కస్టమర్ రిజిస్ట్రేషన్ (With Live Photo)
-      </h4>
+      </h3>
       
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-        {/* Name Input Box */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* Name Input */}
         <input 
           type="text" 
           placeholder="కస్టమర్ పేరు (Customer Name)" 
           value={name}
           onChange={(e) => setName(e.target.value)}
-          style={{ flex: '1', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', minWidth: '160px' }}
+          style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: '1rem' }}
         />
         
-        {/* Village Input Box */}
+        {/* Village Input */}
         <input 
           type="text" 
           placeholder="ఊరు పేరు (Village Name)" 
           value={village}
           onChange={(e) => setVillage(e.target.value)}
-          style={{ flex: '1', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', minWidth: '160px' }}
+          style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: '1rem' }}
         />
 
-        {/* Camera Activation Button */}
+        {/* Camera Button */}
         <button 
           onClick={handleCameraCapture}
           disabled={isCapturing}
           style={{
+            width: '100%',
             backgroundColor: isCapturing ? '#9ca3af' : '#4b5563',
             color: '#ffffff',
             border: 'none',
-            padding: '10px 16px',
+            padding: '12px',
             borderRadius: '8px',
             cursor: 'pointer',
             fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px'
+            fontSize: '1rem'
           }}
         >
-          📷 {isCapturing ? 'Capturing...' : 'Capture Photo'}
+          📷 {isCapturing ? 'කැප්චර් అవుతోంది...' : 'క్యాప్చర్ ఫోటో (Take Photo)'}
         </button>
       </div>
 
-      {/* Captured Image Quick Live Preview Frame */}
+      {/* Preview Frame */}
       {imageSrc && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f9fafb', padding: '10px', borderRadius: '8px', border: '1px dashed #10b981' }}>
-          <img 
-            src={imageSrc} 
-            alt="Preview" 
-            style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #10b981' }} 
-          />
-          <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: '600' }}>
-            ✔️ ఫోటో రెడీగా ఉంది!
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f0fdf4', padding: '12px', borderRadius: '8px', marginTop: '12px', border: '1px dashed #10b981' }}>
+          <img src={imageSrc} alt="Preview" style={{ width: '55px', height: '55px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #10b981' }} />
+          <span style={{ fontSize: '0.9rem', color: '#16a34a', fontWeight: '600' }}>✔️ ఫోటో రెడీగా ఉంది!</span>
         </div>
       )}
 
-      {/* Save Customer Action Button */}
+      {/* Save Button */}
       <button
         onClick={handleSubmit}
         style={{
-          backgroundColor: '#10b981',
+          width: '100%',
+          backgroundColor: '#10b981', // పర్ఫెక్ట్ గ్రీన్ బటన్
           color: '#ffffff',
           border: 'none',
-          padding: '12px',
+          padding: '14px',
           borderRadius: '8px',
           cursor: 'pointer',
           fontWeight: 'bold',
-          fontSize: '0.95rem',
-          marginTop: '4px',
-          transition: 'background 0.2s'
+          fontSize: '1rem',
+          marginTop: '14px'
         }}
       >
         💾 కస్టమర్ డేటాను సేవ్ చేయి
