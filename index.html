@@ -1,7 +1,4 @@
-
-'use client'; // <-- Next.js App Router 
-import React, { useState } from 'react';
-
+'use client';
 import React, { useState } from 'react';
 
 export default function GramaDashboard() {
@@ -9,7 +6,7 @@ export default function GramaDashboard() {
   // 1. BATTA SAIKRISHNA - IDENTITY & CONFIGS
   // ==========================================
   const ADMIN_NAME = "BATTA SAIKRISHNA";
-  const ADMIN_MOBILE = "+919346271976"; // నీ రియల్ నంబర్ సెట్ అయింది మావా!
+  const ADMIN_MOBILE = "+919346271976"; 
   const BANK_NAME = "AU FINANCIAL BANK";
   const APP_URL = "https://grama-collection-manager-8087ml13o-hardikhayan-8403s-projects.vercel.app";
 
@@ -93,7 +90,7 @@ export default function GramaDashboard() {
     setImageSrc(null);
   };
 
-  // 5. Export Data Function (ఇక్కడికి మార్చాను మావా!)
+  // 5. Export Data Function
   const exportData = () => {
     const data = JSON.stringify(customerList, null, 2);
     const blob = new Blob([data], { type: "application/json" });
@@ -114,8 +111,8 @@ export default function GramaDashboard() {
           BS
         </div>
         <div>
-          <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', color: '#000000' }}>స్వాగతం, {ADMIN_NAME}!</h2>
-          <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#6b7280' }}>👑 System Admin & Owner</p>
+          <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0', color: '#000000' }}>👑 స్వాగతం, {ADMIN_NAME}!</h2>
+          <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#6b7280' }}>System Admin & Owner</p>
         </div>
       </div>
 
@@ -209,7 +206,7 @@ export default function GramaDashboard() {
       </h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
         <button onClick={exportData} style={{ ...actionButtonStyle, background: '#2563eb' }}>
-          📥 Export Backup (ఫైల్ డౌన్‌లోడ్)
+          📥 Export Backup (ఫైల్ డౌน์โหลด)
         </button>    
       </div>
 
