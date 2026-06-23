@@ -1,32 +1,64 @@
-import React, { useState } from 'react';
+Import React, { useState, useEffect } from 'react';
 
-export default function GramaDashboard() {
-  // ==========================================
-  // 1. అడ్మిన్ కాన్స్టంట్స్ & స్టేట్స్ (Batta Saikrishna Custom Setup)
-  // ==========================================
-  const ADMIN_NAME = "BATTA SAIKRISHNA";
-  const ADMIN_MOBILE = "+91XXXXXXXXXX"; // మావా, ఇక్కడ నీ కరెక్ట్ నంబర్ ఇవ్వు!
-  const BANK_NAME = "AU FINANCIAL BANK";
+// ==========================================
+// 1. GLOBAL APP LOGIC HOOK (Data Handlers)
+// ==========================================
+export const useGramaCollectionSystem = () => {
+  const [isAdminApproved, setIsAdminApproved] = useState(false);
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [employeePin, setEmployeePin] = useState('');
+  const [customers, setCustomers] = useState([]); 
   
+  // Custom Constants as requested
+  const ADMIN_NAME = "BATTA SAIKRISHNA";
+  const ADMIN_MOBILE = "+91XXXXXXXXXX"; // ఇక్కడ నీ రియల్ మొబైల్ నంబర్ ఇవ్వు మావా
+  const BANK_NAME = "AU FINANCIAL BANK";
+  const APP_URL = "https://grama-collection-manager-8087ml13o-hardikhayan-8403s-projects.vercel.app";
+  
+  // Employee Verification via WhatsApp
+  const triggerEmployeeVerification = (employeeName) => {
+    const generatedOTP = Math.floor(1000 + Math.random() * 9000); 
+    setShowApprovalModal(true);
+    
+    const textMessage = `🚨 Security Alert! Employee *${employeeName}* attempts to log in to Grama Manager. Provide this verification OTP code if authorized: *${generatedOTP}*`;
+    const whatsappGatewayUrl = `https://api.whatsapp.com/send?phone=${ADMIN_MOBILE}&text=${encodeURIComponent(textMessage)}`;
+    
+    window.open(whatsappGatewayUrl, '_blank');
+    return generatedOTP; 
+  };
+
+  // Transaction Message Parser Template 
+  const generateCustomerReceiptMessage = (customerName, amountPaid, balanceDue) => {
+    return `Dear Customer, transacting with *${BANK_NAME}*. Payment of ₹${amountPaid} processed successfully by Admin ${ADMIN_NAME}. Remaining Balance: ₹${balanceDue}. Check status here: ${APP_URL} . For queries, support contact: ${ADMIN_MOBILE}`;
+  };
+
+  return {
+    ADMIN_NAME,
+    ADMIN_MOBILE,
+    BANK_NAME,
+    APP_URL,
+    triggerEmployeeVerification,
+    generateCustomerReceiptMessage,
+    customers,
+    setCustomers
+  };
+};
+
+// ==========================================
+// 2. UI COMPONENT: CUSTOMER CAPTURE ROW (With Camera)
+// ==========================================
+export const CustomerCaptureRow = ({ onSaveCustomer }) => {
   const [name, setName] = useState('');
   const [village, setVillage] = useState('');
   const [imageSrc, setImageSrc] = useState(null);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [selectedDay, setSelectedDay] = useState('Tuesday (మంగళవారం)');
 
-  // వాట్సాప్ వెరిఫికేషన్ మెసేజ్ ట్రిగ్గర్
-  const triggerEmployeeVerification = (employeeName) => {
-    const generatedOTP = Math.floor(1000 + Math.random() * 9000);
-    const textMessage = `🚨 Security Alert! Employee *${employeeName}* attempts to log in to Grama Manager. Code: *${generatedOTP}*`;
-    const whatsappGatewayUrl = `https://api.whatsapp.com/send?phone=${ADMIN_MOBILE}&text=${encodeURIComponent(textMessage)}`;
-    window.open(whatsappGatewayUrl, '_blank');
-  };
-
-  // లైవ్ కెమెరా క్యాప్చర్ లాజిక్
+  // Mobile Camera Capture Trigger Handler
   const handleCameraCapture = async () => {
     try {
       setIsCapturing(true);
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      
       const video = document.createElement('video');
       video.srcObject = stream;
       video.play();
@@ -39,179 +71,129 @@ export default function GramaDashboard() {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0);
           
+          // Convert captured photo to Base64 String format
           const capturedDataUrl = canvas.toDataURL('image/jpeg');
           setImageSrc(capturedDataUrl);
           
+          // Stop camera stream to save battery
           stream.getTracks().forEach(track => track.stop());
           setIsCapturing(false);
-        }, 1000);
+        }, 1000); // 1-second delay for focus
       };
     } catch (err) {
-      alert("Camera open avvaledhu mavaa!");
+      console.error("Camera access failed mavaa: ", err);
+      alert("Camera open avvaledhu mavaa! Settings lo camera permissions check chesko.");
       setIsCapturing(false);
     }
   };
 
-  // డేటా సేవ్ బటన్ యాక్షన్
-  const handleSaveCustomer = () => {
+  // Submit Handler to save name, village and captured image
+  const handleSubmit = () => {
     if (!name || !village) {
-      alert("పేరు మరియు ఊరు ఎంటర్ చేయాలి మావా!");
+      alert("పేరు మరియు ఊరు ఖచ్చితంగా ఎంటర్ చేయాలి మావా!");
       return;
     }
-    alert(`🎉 కస్టమర్ ${name} ప్రొఫైల్ ఫోటోతో సహా సక్సెస్‌ఫుల్‌గా యాడ్ అయింది మావా!`);
-    setName('');
-    setVillage('');
-    setImageSrc(null);
+    
+    // Trigger the save function passed from main app dashboard
+    if (onSaveCustomer) {
+      onSaveCustomer({ name, village, image: imageSrc });
+      // Reset input fields after successful save
+      setName('');
+      setVillage('');
+      setImageSrc(null);
+      alert("కస్టమర్ ప్రొఫైల్ ఫోటోతో సహా సక్సెస్‌ఫుల్‌గా యాడ్ అయింది మావా! 🎉");
+    }
   };
 
   return (
-    <div style={{ fontFamily: 'sans-serif', maxWidth: '500px', margin: '0 auto', padding: '15px', background: '#f9fafb', minHeight: '100vh', boxSizing: 'border-box' }}>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px',
+      padding: '16px',
+      background: '#ffffff',
+      borderRadius: '12px',
+      border: '1px solid #e5e7eb',
+      margin: '15px 0',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+    }}>
+      <h4 style={{ margin: '0 0 4px 0', color: '#1f2937', fontWeight: 'bold' }}>
+        👤 కొత్త కస్టమర్ రిజిస్ట్రేషన్ (With Live Photo)
+      </h4>
       
-      {/* 1. అడ్మిన్ వెల్కమ్ హెడర్ */}
-      <h2 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 20px 0', color: '#000000' }}>
-        స్వాగతం, అడ్మిన్!
-      </h2>
+      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+        {/* Name Input Box */}
+        <input 
+          type="text" 
+          placeholder="కస్టమర్ పేరు (Customer Name)" 
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ flex: '1', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', minWidth: '160px' }}
+        />
+        
+        {/* Village Input Box */}
+        <input 
+          type="text" 
+          placeholder="ఊరు పేరు (Village Name)" 
+          value={village}
+          onChange={(e) => setVillage(e.target.value)}
+          style={{ flex: '1', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', minWidth: '160px' }}
+        />
 
-      {/* 2. పాత 4 గ్రీన్ నావిగేషన్ బటన్లు */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-        <button style={navButtonStyle}>👥 Groups<br/>Management</button>
-        <button style={navButtonStyle}>👤 Customers<br/>Management</button>
-        <button style={navButtonStyle}>💰 Collections<br/>Entry</button>
-        <button style={navButtonStyle}>📊 Reports<br/>Screen</button>
-      </div>
-
-      {/* 3. కొత్త ఫీచర్: కెమెరా రిజిస్ట్రేషన్ గ్రీన్ బాక్స్ (లైవ్ ప్రివ్యూతో) */}
-      <div style={{ border: '1px solid #10b981', borderRadius: '12px', padding: '16px', background: '#ffffff', marginBottom: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-        <h4 style={{ margin: '0 0 12px 0', color: '#10b981', fontWeight: 'bold', fontSize: '16px' }}>
-          👤 కొత్త కస్టమర్ రిజిస్ట్రేషన్ (With Live Photo)
-        </h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <input 
-            type="text" 
-            placeholder="కస్టమర్ పేరు (Customer Name)" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={inputStyle}
-          />
-          <input 
-            type="text" 
-            placeholder="ఊరు పేరు (Village Name)" 
-            value={village}
-            onChange={(e) => setVillage(e.target.value)}
-            style={inputStyle}
-          />
-          <button onClick={handleCameraCapture} disabled={isCapturing} style={{ ...actionButtonStyle, background: '#4b5563' }}>
-            📷 {isCapturing ? 'Capturing...' : 'క్యాప్చర్ ఫోటో (Take Photo)'}
-          </button>
-        </div>
-
-        {/* లైవ్ ఫోటో ప్రివ్యూ సర్కిల్ */}
-        {imageSrc && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f0fdf4', padding: '10px', borderRadius: '8px', marginTop: '12px', border: '1px dashed #10b981' }}>
-            <img src={imageSrc} alt="Preview" style={{ width: '55px', height: '55px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #10b981' }} />
-            <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '600' }}>✔️ ఫోటో రెడీగా ఉంది!</span>
-          </div>
-        )}
-
-        <button onClick={handleSaveCustomer} style={{ ...actionButtonStyle, background: '#10b981', marginTop: '12px' }}>
-          💾 కస్టమర్ డేటాను సేవ్ చేయి
+        {/* Camera Activation Button */}
+        <button 
+          onClick={handleCameraCapture}
+          disabled={isCapturing}
+          style={{
+            backgroundColor: isCapturing ? '#9ca3af' : '#4b5563',
+            color: '#ffffff',
+            border: 'none',
+            padding: '10px 16px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          📷 {isCapturing ? 'Capturing...' : 'Capture Photo'}
         </button>
       </div>
 
-      {/* 4. పాత EMI వసూళ్ల డాష్‌బోర్డ్ బాక్స్ */}
-      <div style={{ border: '1px solid #10b981', borderRadius: '12px', padding: '16px', background: '#ffffff', marginBottom: '20px' }}>
-        <h4 style={{ margin: '0 0 12px 0', color: '#10b981', fontWeight: 'bold', textAlign: 'center', fontSize: '16px' }}>
-          🗓️ ఈ వారం EMI వసూళ్ల డాష్‌బోర్డ్
-        </h4>
-        
-        <p style={{ margin: '4px 0', fontSize: '14px', fontWeight: 'bold', color: '#10b981' }}>కలెక్షన్ వారాన్ని ఎంచుకోండి:</p>
-        <select 
-          value={selectedDay} 
-          onChange={(e) => setSelectedDay(e.target.value)}
-          style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #d1d5db', background: '#f9fafb', marginBottom: '12px', fontSize: '14px' }}
-        >
-          <option>Tuesday (మంగళవారం)</option>
-          <option>Wednesday (బుధవారం)</option>
-        </select>
-
-        {/* ఇన్ఫో బ్యాడ్జీలు */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-          <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', padding: '8px', borderRadius: '8px', textAlign: 'center', color: '#991b1b', fontSize: '13px', fontWeight: 'bold' }}>
-            ⚠️ బాకీ ఉన్నవారు: 0 మంది
-          </div>
-          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '8px', borderRadius: '8px', textAlign: 'center', color: '#16a34a', fontSize: '13px', fontWeight: 'bold' }}>
-            💰 రావలసిన అమౌంట్: ₹0
-          </div>
+      {/* Captured Image Quick Live Preview Frame */}
+      {imageSrc && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#f9fafb', padding: '10px', borderRadius: '8px', border: '1px dashed #10b981' }}>
+          <img 
+            src={imageSrc} 
+            alt="Preview" 
+            style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #10b981' }} 
+          />
+          <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: '600' }}>
+            ✔️ ఫోటో రెడీగా ఉంది!
+          </span>
         </div>
+      )}
 
-        {/* టేబుల్ డేటా */}
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-            <thead>
-              <tr style={{ background: '#10b981', color: '#ffffff' }}>
-                <th style={{ padding: '10px', textAlign: 'left' }}>కస్టమర్ (గ్రూప్)</th>
-                <th style={{ padding: '10px', textAlign: 'left' }}>లోన్ / కట్టింది</th>
-                <th style={{ padding: '10px', textAlign: 'left' }}>బాకీ</th>
-                <th style={{ padding: '10px', textAlign: 'left' }}>అలర్ట్</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
-                  ఈ వారం ఈ రోజున ఎలాంటి గ్రూపులు లేదా కస్టమర్లు లేరు మావా!
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* 5. యాప్ డేటా బ్యాకప్ సిస్టమ్ బటన్లు */}
-      <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '20px 0 12px 0', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-        💾 యాప్ డేటా బ్యాకప్ సిస్టమ్
-      </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <button style={{ ...actionButtonStyle, background: '#2563eb' }}>📥 Export Backup (ఫైల్ డౌన్‌లోడ్)</button>
-        <button style={{ ...actionButtonStyle, background: '#7c3aed' }}>📤 Import Backup (ఫైల్ అప్‌లోడ్)</button>
-      </div>
-
+      {/* Save Customer Action Button */}
+      <button
+        onClick={handleSubmit}
+        style={{
+          backgroundColor: '#10b981',
+          color: '#ffffff',
+          border: 'none',
+          padding: '12px',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontWeight: 'bold',
+          fontSize: '0.95rem',
+          marginTop: '4px',
+          transition: 'background 0.2s'
+        }}
+      >
+        💾 కస్టమర్ డేటాను సేవ్ చేయి
+      </button>
     </div>
   );
-}
-
-// ==========================================
-// స్టైలింగ్ ఆబ్జెక్ట్స్ (నీ పాత యాప్ డిజైన్ మ్యాచ్ అవ్వడానికి)
-// ==========================================
-const navButtonStyle = {
-  background: '#f0fdf4',
-  border: '1px solid #10b981',
-  color: '#10b981',
-  padding: '16px 8px',
-  borderRadius: '12px',
-  fontWeight: 'bold',
-  fontSize: '14px',
-  cursor: 'pointer',
-  textAlign: 'center',
-  lineHeight: '1.4'
 };
-
-const inputStyle = {
-  width: '100%',
-  padding: '12px',
-  borderRadius: '8px',
-  border: '1px solid #d1d5db',
-  boxSizing: 'border-box',
-  fontSize: '14px'
-};
-
-const actionButtonStyle = {
-  width: '100%',
-  color: '#ffffff',
-  border: 'none',
-  padding: '12px',
-  borderRadius: '8px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  fontSize: '14px',
-  textAlign: 'center'
-};
+ Ee code ni apply cheste em update avutundi mavaa
